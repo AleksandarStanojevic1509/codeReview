@@ -1,11 +1,9 @@
 const Sequelize                 = require('sequelize');
-const {Post, Comment, Friend}   = require('../models');
+const {Post, Comment, Friend, User}   = require('../models');
+const {FriendModal} = require('./friend');
 const Op = Sequelize.Op;
 
-export class User extends ActiveRecords{
-    constructor(id) {
-        super(id);
-    }
+export class UserModal extends User {
     async static getCommentsForPosts(){
         let posts = await Post.findAll({
             where: {
@@ -34,22 +32,15 @@ export class User extends ActiveRecords{
                 ]
             }
         })
-
         return friends;
     }
 
     async addFriend(userId) {
-        let friend = Friend.findOne({
-            where: {
-                user_id: this.id
-            }
-        });
-
+        let friend = new FriendModal();
+        friend.user_id = this.id;
         friend.friend_id = userId;
         friend.status = 1;
-        friend.save()
-
-
+        friend.save();
         return true;
     }
 
@@ -60,8 +51,8 @@ export class User extends ActiveRecords{
            }
        })
 
-        await friend.destroy();
-       return true;
+        friend.destroy();
+        return true;
     }
 
     async hasPosts(){
@@ -70,8 +61,7 @@ export class User extends ActiveRecords{
                 user_id: this.id
             }
         })
-
-        return posts.length > 0
+        return posts.length > 0;
     }
 
     async hasActivePosts(){
@@ -81,7 +71,6 @@ export class User extends ActiveRecords{
                 status: 1
             }
         })
-
-        return activePosts.length > 0
+        return activePosts.length > 0;
     }
 }
